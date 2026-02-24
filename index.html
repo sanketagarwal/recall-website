@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recall — The Financial Superintelligence Lab</title>
+  <meta name="description" content="We build AI systems that operate in live financial markets. We study what happens. We publish what we learn.">
+  <meta property="og:title" content="Recall — Markets are the experiment.">
+  <meta property="og:description" content="We build AI systems that operate in live financial markets — crypto, DeFi, traditional exchanges, prediction markets.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://recall.network">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23222'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23d4cfc8' font-family='sans-serif' font-weight='700' font-size='18'>R</text></svg>">
+
+  <style>
+    /* ================================================================ */
+    /*  REPLICA LL TT                                                   */
+    /* ================================================================ */
+    @font-face { font-family:'Replica LL TT'; src:url('fonts/ReplicaLLTT-Light.woff2') format('woff2'); font-weight:300; font-style:normal; font-display:swap; }
+    @font-face { font-family:'Replica LL TT'; src:url('fonts/ReplicaLLTT-Regular.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; }
+    @font-face { font-family:'Replica LL TT'; src:url('fonts/ReplicaLLTT-Italic.woff2') format('woff2'); font-weight:400; font-style:italic; font-display:swap; }
+    @font-face { font-family:'Replica LL TT'; src:url('fonts/ReplicaLLTT-Bold.woff2') format('woff2'); font-weight:700; font-style:normal; font-display:swap; }
+    @font-face { font-family:'Replica LL TT'; src:url('fonts/ReplicaLLTT-Heavy.woff2') format('woff2'); font-weight:900; font-style:normal; font-display:swap; }
+
+    /* ================================================================ */
+    /*  RESET                                                           */
+    /* ================================================================ */
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Replica LL TT',system-ui,-apple-system,sans-serif;background:#000;color:#6b6b6b;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button{font-family:inherit;cursor:pointer;border:none;background:none}
+    ul,ol{list-style:none}
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-track{background:#000}
+    ::-webkit-scrollbar-thumb{background:#222}
+
+    /* ================================================================ */
+    /*  TOKENS                                                          */
+    /* ================================================================ */
+    :root{
+      --text:#6b6b6b; --text-sub:#888; --heading:#d4cfc8; --heading-bright:#e8e4de;
+      --label:#555; --border:#1f1f1f; --card:#0d0d0f; --card-hover:#141416;
+      --container:980px; --header-h:56px;
+    }
+
+    .container{max-width:var(--container);margin:0 auto;padding:0 32px}
+
+    /* ================================================================ */
+    /*  HEADER                                                          */
+    /* ================================================================ */
+    .header{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--header-h);background:rgba(0,0,0,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+    .header-inner{max-width:var(--container);margin:0 auto;padding:0 32px;height:100%;display:flex;align-items:center;justify-content:space-between}
+    .logo{font-size:20px;font-weight:700;color:var(--heading);letter-spacing:-.3px}
+    .nav{display:flex;align-items:center;gap:8px}
+    .nav a{font-size:14px;color:var(--text);padding:8px 12px;transition:color .15s}
+    .nav a:hover{color:var(--heading)}
+    .mobile-toggle{display:none;color:var(--text);padding:8px}
+    .mobile-menu{display:none;position:fixed;top:var(--header-h);left:0;right:0;background:rgba(0,0,0,.97);padding:16px 32px 24px;flex-direction:column;gap:4px;backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .mobile-menu.open{display:flex}
+    .mobile-menu a{font-size:15px;color:var(--text);padding:14px 0;border-bottom:1px solid var(--border)}
+    .mobile-menu a:last-child{border-bottom:none}
+
+    /* ================================================================ */
+    /*  HERO                                                            */
+    /* ================================================================ */
+    .hero{position:relative;min-height:min(75vh,700px);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:calc(var(--header-h) + 60px) 0 60px}
+    .hero canvas{position:absolute;inset:0;width:100%;height:100%}
+    .hero-fade{position:absolute;inset:0;background:radial-gradient(ellipse 50% 40% at 50% 42%,transparent 0%,#000 100%),linear-gradient(to bottom,transparent 70%,#000 100%);pointer-events:none}
+    .hero-content{position:relative;z-index:2;text-align:center;max-width:720px;padding:0 32px}
+    .hero-headline{font-size:clamp(42px,6.5vw,72px);font-weight:400;color:var(--heading);line-height:1.1;letter-spacing:-.5px;margin-bottom:28px;opacity:0;animation:heroIn 1.2s cubic-bezier(.25,1,.5,1) .2s forwards}
+    .hero-sub{font-size:16px;line-height:1.75;color:var(--text);max-width:560px;margin:0 auto;opacity:0;animation:heroIn 1.2s cubic-bezier(.25,1,.5,1) .5s forwards}
+    @keyframes heroIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ================================================================ */
+    /*  DIVIDER                                                         */
+    /* ================================================================ */
+    .divider{max-width:var(--container);margin:0 auto;padding:0 32px}
+    .divider-line{height:1px;background:var(--border)}
+
+    /* ================================================================ */
+    /*  MEMO (was mission)                                              */
+    /* ================================================================ */
+    .memo{padding:72px 0 40px}
+    .memo-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:3px;color:var(--label);margin-bottom:40px}
+    .memo-body{font-size:15px;line-height:1.85;color:var(--text);max-width:680px}
+    .memo-body p{margin-bottom:20px}
+    .memo-body strong{color:var(--heading-bright);font-weight:400}
+    .memo-sig{font-size:14px;color:var(--heading);margin-top:32px;font-style:italic}
+
+    /* ================================================================ */
+    /*  RESEARCH AREAS                                                  */
+    /* ================================================================ */
+    .research-areas{padding:48px 0 80px}
+    .ra-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:3px;color:var(--label);margin-bottom:16px}
+    .ra-title{font-size:clamp(28px,3.5vw,38px);font-weight:400;color:var(--heading);line-height:1.15;margin-bottom:56px}
+    .ra-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border)}
+    .ra-card{background:#000;padding:40px 36px;transition:background .35s cubic-bezier(.25,1,.5,1),transform .35s cubic-bezier(.25,1,.5,1)}
+    .ra-card:hover{background:#0a0a0c;transform:translateY(-3px)}
+    .ra-card-num{font-size:11px;color:var(--label);letter-spacing:1px;margin-bottom:20px}
+    .ra-card h3{font-size:18px;font-weight:700;color:var(--heading);margin-bottom:14px;line-height:1.3}
+    .ra-card-desc{font-size:14px;color:var(--text);line-height:1.7;margin-bottom:20px}
+    .ra-card ul{display:flex;flex-direction:column;gap:8px}
+    .ra-card li{font-size:13px;color:var(--text-sub);padding-left:16px;position:relative}
+    .ra-card li::before{content:'';position:absolute;left:0;top:8px;width:4px;height:4px;background:var(--label);border-radius:50%}
+
+    /* ================================================================ */
+    /*  ARENA                                                           */
+    /* ================================================================ */
+    .arena{padding:48px 0 60px}
+    .arena-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:3px;color:var(--label);margin-bottom:16px}
+    .arena-title{font-size:clamp(32px,4vw,44px);font-weight:400;color:var(--heading);line-height:1.15;margin-bottom:16px}
+    .arena-desc{font-size:15px;color:var(--text);line-height:1.7;max-width:520px;margin-bottom:48px}
+    .chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:48px 40px 36px;margin-bottom:40px;position:relative;overflow:hidden}
+    .chart-gridlines{position:absolute;top:48px;left:40px;right:40px;bottom:80px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
+    .chart-gridline{height:1px;background:rgba(255,255,255,.025)}
+    .chart-bars{display:flex;justify-content:space-around;align-items:flex-end;height:340px;gap:16px;position:relative;z-index:1}
+    .chart-bar-group{display:flex;flex-direction:column;align-items:center;flex:1;height:100%;justify-content:flex-end;max-width:130px}
+    .chart-bar-value{font-size:13px;font-weight:400;color:var(--text-sub);margin-bottom:10px;flex-shrink:0}
+    .chart-bar-area{width:100%;display:flex;align-items:flex-end;justify-content:center;flex:1;position:relative}
+    .chart-bar-col{width:52px;border-radius:4px 4px 0 0;min-height:0;transition:height 1s cubic-bezier(.25,1,.5,1),filter .3s,transform .3s;position:relative;cursor:pointer}
+    .chart-bar-col:hover{transform:scaleY(1.04) translateY(-2px);filter:brightness(1.25)}
+    .chart-bar-logo{width:28px;height:28px;position:absolute;top:-36px;left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;pointer-events:none;transition:transform .3s cubic-bezier(.25,1,.5,1)}
+    .chart-bar-col:hover .chart-bar-logo{transform:translateX(-50%) scale(1.15)}
+    .chart-bar-logo svg{width:100%;height:100%}
+    .chart-bar-model{font-size:12px;color:var(--text);margin-top:16px;text-align:center;flex-shrink:0;white-space:nowrap}
+    .btn-enter{font-size:14px;font-weight:500;color:#111;background:var(--heading-bright);padding:12px 24px;border-radius:8px;display:inline-block;transition:opacity .15s}
+    .btn-enter:hover{opacity:.85}
+
+    /* ================================================================ */
+    /*  CTA                                                             */
+    /* ================================================================ */
+    .cta{padding:100px 0}
+    .cta-box{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:72px 40px;text-align:center;position:relative;overflow:hidden}
+    .cta-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:3px;color:var(--label);margin-bottom:16px}
+    .cta-title{font-size:clamp(28px,3.5vw,38px);font-weight:400;color:var(--heading);line-height:1.15;margin-bottom:12px}
+    .cta-sub{font-size:15px;color:var(--text);max-width:440px;margin:0 auto 36px}
+    .cta-form{display:flex;max-width:440px;margin:0 auto;border-radius:8px;overflow:hidden}
+    .cta-input{flex:1;font-family:inherit;font-size:14px;color:var(--heading);background:#000;border:1px solid var(--border);border-right:none;border-radius:8px 0 0 8px;padding:14px 16px;outline:none;transition:border-color .2s}
+    .cta-input::placeholder{color:var(--label)}
+    .cta-input:focus{border-color:#333}
+    .cta-submit{font-family:inherit;font-size:13px;font-weight:600;color:#111;background:var(--heading-bright);padding:14px 28px;border:none;border-radius:0 8px 8px 0;cursor:pointer;white-space:nowrap;transition:opacity .15s}
+    .cta-submit:hover{opacity:.85}
+    .cta-note{font-size:11px;color:var(--label);margin-top:16px}
+    @media(max-width:640px){.cta-form{flex-direction:column;border-radius:8px}.cta-input{border-right:1px solid var(--border);border-radius:8px 8px 0 0}.cta-submit{border-radius:0 0 8px 8px}}
+
+    /* ================================================================ */
+    /*  INSIGHTS                                                        */
+    /* ================================================================ */
+    .insights{padding:0 0 80px}
+    .insights-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+    .insight-card{background:#000;padding:28px 24px;display:block;transition:background .25s}
+    .insight-card:hover{background:var(--card)}
+    .insight-card h4{font-size:15px;font-weight:400;color:var(--heading);line-height:1.45;margin-bottom:8px;transition:color .25s}
+    .insight-card:hover h4{color:var(--heading-bright)}
+    .insight-card-meta{font-size:10px;color:var(--label);letter-spacing:.5px}
+
+    /* ================================================================ */
+    /*  BLOG                                                            */
+    /* ================================================================ */
+    .blog{padding:80px 0 120px}
+    .blog-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-bottom:40px}
+    .blog-title{font-size:32px;font-weight:400;color:var(--heading)}
+    .filter-pills{display:flex;gap:8px;flex-wrap:wrap}
+    .filter-pill{font-size:13px;font-weight:500;color:var(--text);padding:7px 16px;border-radius:20px;border:1px solid var(--border);transition:color .15s,border-color .15s,background .15s}
+    .filter-pill:hover{color:var(--text-sub);border-color:#333}
+    .filter-pill.active{color:var(--heading);border-color:#444;background:rgba(255,255,255,.03)}
+    .blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .blog-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s;display:flex;flex-direction:column}
+    .blog-card:hover{border-color:#333}
+    .blog-card.hidden{display:none}
+    .blog-card-img{height:160px;width:100%}
+    .blog-card-body{padding:24px;display:flex;flex-direction:column;flex:1}
+    .blog-card-cat{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:1.5px;color:var(--label);margin-bottom:10px}
+    .blog-card-title{font-size:18px;font-weight:400;color:var(--heading);line-height:1.35;margin-bottom:10px}
+    .blog-card:hover .blog-card-title{color:var(--heading-bright)}
+    .blog-card-excerpt{font-size:13px;color:var(--text);line-height:1.6;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:16px}
+    .blog-card-date{font-size:11px;color:var(--label)}
+
+    /* ================================================================ */
+    /*  FOOTER                                                          */
+    /* ================================================================ */
+    .footer{padding:48px 0}
+    .footer-inner{display:flex;align-items:center;justify-content:space-between}
+    .footer-logo{font-size:16px;font-weight:700;color:var(--heading)}
+    .footer-links{display:flex;gap:24px}
+    .footer-links a{font-size:13px;color:var(--text);transition:color .15s}
+    .footer-links a:hover{color:var(--heading)}
+    .footer-copy{font-size:12px;color:var(--label)}
+
+    /* ================================================================ */
+    /*  SCROLL ANIMATIONS                                               */
+    /* ================================================================ */
+    .reveal{opacity:0;transform:translateY(40px);will-change:opacity,transform}
+    .reveal.visible{opacity:1;transform:translateY(0);transition:opacity 1s cubic-bezier(.25,1,.5,1),transform 1s cubic-bezier(.25,1,.5,1)}
+    .reveal-stagger>*{opacity:0;transform:translateY(30px);will-change:opacity,transform}
+    .reveal-stagger.visible>*{opacity:1;transform:translateY(0);transition:opacity .9s cubic-bezier(.25,1,.5,1),transform .9s cubic-bezier(.25,1,.5,1)}
+    .reveal-stagger.visible>*:nth-child(1){transition-delay:0s}
+    .reveal-stagger.visible>*:nth-child(2){transition-delay:.1s}
+    .reveal-stagger.visible>*:nth-child(3){transition-delay:.2s}
+    .reveal-stagger.visible>*:nth-child(4){transition-delay:.3s}
+    .reveal-stagger.visible>*:nth-child(5){transition-delay:.4s}
+    .reveal-stagger.visible>*:nth-child(6){transition-delay:.5s}
+    .reveal-scale{opacity:0;transform:scale(.96) translateY(30px);will-change:opacity,transform}
+    .reveal-scale.visible{opacity:1;transform:scale(1) translateY(0);transition:opacity 1.1s cubic-bezier(.25,1,.5,1),transform 1.1s cubic-bezier(.25,1,.5,1)}
+
+    /* ================================================================ */
+    /*  RESPONSIVE                                                      */
+    /* ================================================================ */
+    @media(max-width:768px){
+      .nav{display:none} .mobile-toggle{display:block}
+      .blog-grid{grid-template-columns:1fr} .blog-header{flex-direction:column;align-items:flex-start}
+      .chart-card{padding:32px 20px 28px} .chart-bars{height:220px} .chart-bar-col{width:32px}
+      .chart-bar-logo{width:24px;height:24px}
+      .ra-grid{grid-template-columns:1fr}
+      .insights-grid{grid-template-columns:1fr}
+      .container{padding:0 20px} .divider{padding:0 20px} .header-inner{padding:0 20px}
+      .footer-inner{flex-direction:column;gap:20px;text-align:center}
+      .footer-links{flex-wrap:wrap;justify-content:center}
+    }
+    @media(max-width:640px){
+      .chart-bars{overflow-x:auto;gap:4px;justify-content:flex-start}
+      .chart-bar-group{min-width:64px}
+      .filter-pills{overflow-x:auto;flex-wrap:nowrap}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="logo">Recall</a>
+      <nav class="nav">
+        <a href="#blog">Blog</a>
+        <a href="#arena">Model Arena</a>
+        <a href="#">Staking</a>
+      </nav>
+      <button class="mobile-toggle" id="mobile-toggle" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      </button>
+    </div>
+    <nav class="mobile-menu" id="mobile-menu">
+      <a href="#blog">Blog</a>
+      <a href="#arena">Model Arena</a>
+      <a href="#">Staking</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <canvas id="grid-canvas"></canvas>
+    <div class="hero-fade"></div>
+    <div class="hero-content">
+      <h1 class="hero-headline">An open research lab for AI-native finance</h1>
+      <p class="hero-sub">We build AI systems that operate in live financial markets for crypto, DeFi, traditional exchanges, and prediction markets. Everything we learn gets published.</p>
+    </div>
+  </section>
+
+  <!-- MEMO -->
+  <section class="memo">
+    <div class="container reveal">
+      <div class="memo-label">Memo</div>
+      <h2 style="font-size:clamp(28px,3.5vw,38px);font-weight:400;color:var(--heading);line-height:1.15;margin-bottom:32px">Vision</h2>
+      <div class="memo-body">
+        <p>A growing share of trading volume is already algorithmic. Autonomous agents are arbitraging across fragmented crypto venues in real time, LLMs are being wired into trading pipelines and the infrastructure required to operate at this intersection is evolving weekly.</p>
+        <p>And yet, the research is almost entirely closed. Quant funds study these dynamics but publish nothing. AI labs advance the models but don't test them where money is on the line.</p>
+        <p>We exist to conduct and execute on research operating at the intersection of artificial intelligence and financial markets. We build systems, deploy them into live environments, study how they perform, and publish our results.</p>
+        <p>We chose financial markets because they offer something no benchmark can replicate: adaptive adversaries, non-stationary data, nanosecond feedback loops, and genuine stakes. When an agent fails here, the lesson is real. When it succeeds, the insight is durable.</p>
+        <p>We believe the most important research at this intersection should be open, not proprietary.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div></div>
+
+  <!-- RESEARCH AREAS -->
+  <section class="research-areas">
+    <div class="container">
+      <div class="reveal">
+        <div class="ra-label">Focus</div>
+        <h2 class="ra-title">Areas of Research</h2>
+      </div>
+      <div class="ra-grid reveal-stagger">
+        <div class="ra-card">
+          <div class="ra-card-num">01</div>
+          <h3>Agent Engineering</h3>
+          <p class="ra-card-desc">How to build, deploy, and keep alive autonomous AI systems operating in live financial markets. Architecture, orchestration, failure recovery, and the infrastructure that makes it possible.</p>
+          <ul>
+            <li>Multi-venue execution and routing</li>
+            <li>Agent harness design for trading</li>
+            <li>Orchestrating 100+ agents in production</li>
+            <li>Failure modes and recovery patterns</li>
+          </ul>
+        </div>
+        <div class="ra-card">
+          <div class="ra-card-num">02</div>
+          <h3>AI Performance in Markets</h3>
+          <p class="ra-card-desc">Empirical research on how AI systems actually perform when given real capital and real markets. Arbitrage execution, directional trading, market-making which is tested, measured, published.</p>
+          <ul>
+            <li>Can AI agents reliably execute arbitrage?</li>
+            <li>How do autonomous systems behave during volatility?</li>
+            <li>AI vs. human traders: what the data says</li>
+            <li>Should you trust AI with your money?</li>
+          </ul>
+        </div>
+        <div class="ra-card">
+          <div class="ra-card-num">03</div>
+          <h3>Market Structure &amp; Intelligence</h3>
+          <p class="ra-card-desc">How AI is changing the structure of financial markets themselves. Volume analysis, liquidity dynamics, price discovery, and the systemic effects of autonomous participants.</p>
+          <ul>
+            <li>What share of trading volume is now AI?</li>
+            <li>How do AI agents affect price discovery?</li>
+            <li>The role of AI in high-frequency trading</li>
+            <li>Fragmentation and liquidity in crypto markets</li>
+          </ul>
+        </div>
+        <div class="ra-card">
+          <div class="ra-card-num">04</div>
+          <h3>Open Tools &amp; Infrastructure</h3>
+          <p class="ra-card-desc">Production-grade, open-source tooling extracted from our own systems. Execution routers, data pipelines, agent frameworks, and utilities for anyone building at the intersection of AI and markets.</p>
+          <ul>
+            <li>Multi-venue execution engines</li>
+            <li>Real-time data ingestion pipelines</li>
+            <li>Agent evaluation and backtesting frameworks</li>
+            <li>Datasets for AI &times; markets research</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARENA -->
+  <section class="arena" id="arena">
+    <div class="container">
+      <div class="reveal">
+        <div class="arena-label">Introducing</div>
+        <h2 class="arena-title">The Recall Model Arena</h2>
+        <p class="arena-desc">An open proving ground for frontier LLMs across financial markets. Models compete on live capital across arbitrage, quant strategy, risk, and execution — evaluated on the only metric that matters.</p>
+      </div>
+      <div class="chart-card reveal-scale" id="chart-card">
+        <div class="chart-gridlines"><div class="chart-gridline"></div><div class="chart-gridline"></div><div class="chart-gridline"></div><div class="chart-gridline"></div><div class="chart-gridline"></div></div>
+        <div class="chart-bars" id="chart-bars"></div>
+      </div>
+      <div class="reveal">
+        <a href="#" class="btn-enter">Enter the Arena</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSIGHTS -->
+  <section class="insights">
+    <div class="container">
+      <div class="insights-grid reveal-stagger">
+        <a href="#" class="insight-card">
+          <h4>GPT-5 outperforms on Sortino across all regime types</h4>
+          <span class="insight-card-meta">Jan 2026 · 4 min read</span>
+        </a>
+        <a href="#" class="insight-card">
+          <h4>Gemini Pro leads arbitrage trading with 94% fill rate</h4>
+          <span class="insight-card-meta">Jan 2026 · 3 min read</span>
+        </a>
+        <a href="#" class="insight-card">
+          <h4>Claude Opus shows lowest drawdown in vol spikes</h4>
+          <span class="insight-card-meta">Dec 2025 · 5 min read</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div></div>
+
+  <!-- BLOG -->
+  <section class="blog" id="blog">
+    <div class="container">
+      <div class="blog-header reveal">
+        <h2 class="blog-title">Latest</h2>
+        <div class="filter-pills" id="filter-pills">
+          <button class="filter-pill active" data-category="all">All</button>
+          <button class="filter-pill" data-category="Engineering">Engineering</button>
+          <button class="filter-pill" data-category="Product">Product</button>
+          <button class="filter-pill" data-category="Newsletter">Newsletter</button>
+          <button class="filter-pill" data-category="Organisation">Organisation</button>
+        </div>
+      </div>
+      <div class="blog-grid reveal" id="blog-grid"></div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta" id="contact">
+    <div class="container">
+      <div class="cta-box reveal">
+        <div class="cta-label">Contact</div>
+        <h2 class="cta-title">Get in Touch</h2>
+        <p class="cta-sub">Research collaborations, model submissions, or just want to follow along — drop your email.</p>
+        <form class="cta-form" id="cta-form">
+          <input type="email" class="cta-input" placeholder="you@example.com" required>
+          <button type="submit" class="cta-submit">Submit</button>
+        </form>
+        <p class="cta-note" id="cta-note">We'll be in touch. No spam.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div></div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <span class="footer-logo">Recall</span>
+        <div class="footer-links">
+          <a href="#blog">Blog</a>
+          <a href="#arena">Model Arena</a>
+          <a href="#">Staking</a>
+          <a href="#">Twitter / X</a>
+          <a href="#">GitHub</a>
+          <a href="#">Discord</a>
+        </div>
+        <span class="footer-copy">© 2026 Recall</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  (function(){
+    'use strict';
+
+    /* ============================================================== */
+    /*  GRID CANVAS                                                    */
+    /* ============================================================== */
+    const canvas=document.getElementById('grid-canvas'),ctx=canvas.getContext('2d');
+    let dots=[],mouse={x:-9999,y:-9999},w,h,dpr,cols,rows;
+    const GAP=40,INFLUENCE=140,STRENGTH=28,DAMPING=.88,SPRING=.035;
+
+    function initCanvas(){
+      dpr=Math.min(devicePixelRatio||1,2);w=canvas.offsetWidth;h=canvas.offsetHeight;
+      canvas.width=w*dpr;canvas.height=h*dpr;ctx.scale(dpr,dpr);createDots();
+    }
+    function createDots(){
+      dots=[];cols=Math.ceil(w/GAP)+1;rows=Math.ceil(h/GAP)+1;
+      const ox=(w-(cols-1)*GAP)/2,oy=(h-(rows-1)*GAP)/2;
+      for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
+        const x=ox+i*GAP,y=oy+j*GAP;
+        dots.push({ox:x,oy:y,x,y,vx:0,vy:0,col:i,row:j});
+      }
+    }
+    let t=0;
+    function animate(){
+      ctx.clearRect(0,0,w,h);t+=.006;
+      for(const d of dots){
+        const dx=d.ox-mouse.x,dy=d.oy-mouse.y,dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<INFLUENCE&&dist>0){const f=(1-dist/INFLUENCE)*STRENGTH,a=Math.atan2(dy,dx);d.vx+=Math.cos(a)*f*.07;d.vy+=Math.sin(a)*f*.07}
+        const wave=Math.sin(d.ox*.01+t)*Math.cos(d.oy*.01+t*.6)*1.2;
+        d.vx+=(d.ox-d.x)*SPRING;d.vy+=(d.oy+wave-d.y)*SPRING;d.vx*=DAMPING;d.vy*=DAMPING;d.x+=d.vx;d.y+=d.vy;
+      }
+      ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=.5;
+      for(const d of dots){
+        if(d.col<cols-1){const r=dots[d.row*cols+(d.col+1)];ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(r.x,r.y);ctx.stroke()}
+        if(d.row<rows-1){const b=dots[(d.row+1)*cols+d.col];ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(b.x,b.y);ctx.stroke()}
+      }
+      for(const d of dots){const disp=Math.sqrt((d.x-d.ox)**2+(d.y-d.oy)**2);ctx.beginPath();ctx.arc(d.x,d.y,1,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${.06+Math.min(disp/20,.3)})`;ctx.fill()}
+      requestAnimationFrame(animate);
+    }
+    canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top});
+    canvas.addEventListener('mouseleave',()=>{mouse.x=-9999;mouse.y=-9999});
+    canvas.addEventListener('touchmove',e=>{const r=canvas.getBoundingClientRect();mouse.x=e.touches[0].clientX-r.left;mouse.y=e.touches[0].clientY-r.top},{passive:true});
+    canvas.addEventListener('touchend',()=>{mouse.x=-9999;mouse.y=-9999});
+    let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(initCanvas,150)});
+    initCanvas();animate();
+
+    /* ============================================================== */
+    /*  ARENA CHART — real logos, colored bars                         */
+    /* ============================================================== */
+    // Proper brand logos
+    const LOGOS = {
+      openai: `<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg"><path d="M297.06 130.97c7.26-21.79 4.76-45.66-6.85-65.48-17.46-30.4-52.56-46.04-86.84-38.68C186.67 7.04 164.16-4.32 140.58 1.16 109.42 8.66 87.38 36.06 87.71 68.08c-22.14 4.39-40.97 18.69-51.67 39.24-16.09 30.96-10.41 68.84 14.06 93.71-7.26 21.79-4.76 45.66 6.85 65.48 17.46 30.4 52.56 46.04 86.84 38.68 16.71 19.77 39.22 31.13 62.8 25.65 31.17-7.49 53.2-34.9 52.88-66.92 22.14-4.39 40.97-18.69 51.67-39.24 16.09-30.96 10.41-68.84-14.06-93.71zM160.07 285.24c-15.94 0-30.77-5.57-42.75-15.32l2.13-1.23 70.9-40.94c3.6-2.07 5.83-5.93 5.83-10.08V136.04l29.97 17.31c.33.17.55.5.6.88v82.79c-.04 26.6-21.6 48.19-48.19 48.22h-.01zm-103.6-44.22c-7.94-13.77-10.83-29.87-8.16-45.52l2.13 1.27 70.9 40.94c3.57 2.1 8 2.1 11.57 0l86.57-50v34.58c.01.38-.15.74-.43.99l-71.68 41.39c-23.07 13.3-52.57 5.41-65.9-17.64zm-13.47-112.07c7.91-13.73 20.1-23.95 34.55-28.95v84.29c-.02 4.13 2.19 7.95 5.79 10.04l86.57 50-29.97 17.31c-.3.19-.67.22-1 .08L67.35 220.3c-23.02-13.37-30.9-42.87-17.6-65.87l.01-.01zm211.87 49.28-86.57-50 29.97-17.31c.3-.19.67-.22 1-.08l71.68 41.35c23.08 13.33 30.96 42.88 17.6 65.89-7.94 13.74-20.16 23.97-34.63 28.93v-58.74c0-4.14-2.21-7.98-5.83-10.04h.01zm29.82-45.71-2.13-1.27-70.9-40.94c-3.57-2.1-8-2.1-11.57 0l-86.57 50v-34.58c-.01-.38.15-.74.43-.99l71.68-41.35c23.08-13.35 52.64-5.43 65.94 17.68 7.88 13.69 10.77 29.72 8.14 45.38l-.01.01zm-187.54 61.7-29.97-17.31c-.33-.17-.55-.5-.6-.88v-82.79c.02-26.65 21.65-48.24 48.3-48.22 15.91.01 30.72 5.58 42.67 15.33l-2.13 1.23-70.9 40.94c-3.6 2.07-5.83 5.93-5.83 10.08l.02 81.63h-.01zm16.28-28.69 38.54-22.26 38.54 22.26v44.52l-38.54 22.26-38.54-22.26v-44.52z" fill="#10a37f"/></svg>`,
+      anthropic: `<svg viewBox="0 0 256 176" xmlns="http://www.w3.org/2000/svg"><path d="M147.487 0L256 176h-53.318L147.487 0zm-92.292 0L0 176h53.318l55.195-176H55.195z" fill="#D4A27F"/></svg>`,
+      google: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>`,
+      deepseek: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="11" fill="#4D6BFE"/><path d="M7.5 8.5c0-.55.45-1 1-1h7c.55 0 1 .45 1 1v7c0 .55-.45 1-1 1h-7c-.55 0-1-.45-1-1v-7z" fill="none" stroke="#fff" stroke-width="1.2"/><path d="M10 10.5h4M10 12h4M10 13.5h2.5" stroke="#fff" stroke-width="1" stroke-linecap="round"/></svg>`,
+      xai: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2.6 4h4.07l5.33 7.52L17.35 4H21.4l-7.44 10.11L21.85 24h-4.07l-5.78-8.15L6.46 24H2.4l7.82-10.54L2.6 4z" fill="#fff"/></svg>`,
+    };
+
+    const models = [
+      { name:'GPT-5',       ret:12.4, logo:'openai',    color:'#10a37f' },
+      { name:'Claude Opus', ret:8.7,  logo:'anthropic', color:'#D4A27F' },
+      { name:'Gemini Pro',  ret:5.2,  logo:'google',    color:'#4285F4' },
+      { name:'DeepSeek v3', ret:-3.1, logo:'deepseek',  color:'#4D6BFE' },
+      { name:'Grok 4',      ret:-8.6, logo:'xai',       color:'#888' },
+    ];
+
+    let chartAnimated = false;
+
+    function renderChart(animateNow){
+      const maxAbs=Math.max(...models.map(m=>Math.abs(m.ret)));
+      const container=document.getElementById('chart-bars');
+      container.innerHTML='';
+      models.forEach((m,i)=>{
+        const pct=Math.max((Math.abs(m.ret)/maxAbs)*85,3);
+        const group=document.createElement('div');group.className='chart-bar-group';
+
+        const value=document.createElement('div');value.className='chart-bar-value';
+        value.textContent=(m.ret>0?'+':'')+m.ret.toFixed(1)+'%';
+
+        const area=document.createElement('div');area.className='chart-bar-area';
+        const bar=document.createElement('div');bar.className='chart-bar-col';
+        bar.style.background=m.color;bar.style.height='0%';
+
+        // Logo sits inside the bar, pinned to its top
+        const logo=document.createElement('div');logo.className='chart-bar-logo';logo.innerHTML=LOGOS[m.logo];
+        bar.appendChild(logo);
+
+        area.appendChild(bar);
+
+        const label=document.createElement('div');label.className='chart-bar-model';label.textContent=m.name;
+
+        group.append(value,area,label);container.appendChild(group);
+
+        if(animateNow){
+          setTimeout(()=>{bar.style.height=pct+'%'},80+i*120);
+        }
+      });
+    }
+
+    renderChart(false);
+
+    // Observe chart card to trigger bar animation on scroll
+    const chartCard=document.getElementById('chart-card');
+    const chartObs=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting&&!chartAnimated){
+          chartAnimated=true;renderChart(true);chartObs.unobserve(chartCard);
+        }
+      });
+    },{threshold:.3});
+    chartObs.observe(chartCard);
+
+    /* ============================================================== */
+    /*  BLOG                                                           */
+    /* ============================================================== */
+    const gradients=[
+      'linear-gradient(135deg,#1a1a3e,#0d2137 50%,#162a3a)',
+      'linear-gradient(135deg,#2a1a3e,#1d1035 50%,#301845)',
+      'linear-gradient(135deg,#0d3a2e,#1a4a3a 50%,#0e5040)',
+      'linear-gradient(135deg,#3a3520,#4a4025 50%,#2e2a15)',
+      'linear-gradient(135deg,#1a2040,#1e1a50 50%,#0d1a40)',
+      'linear-gradient(135deg,#3a1a1a,#401818 50%,#2e1515)',
+    ];
+    const posts=[
+      {title:'Benchmarking AI agents in perpetual futures markets',category:'Engineering',date:'October 2025',excerpt:'How frontier LLMs compare to specialised trading agents when given real capital and live order books.',gradient:0},
+      {title:'Introducing Recall Canvas — visual model composition',category:'Product',date:'September 2025',excerpt:'A new interface for building, testing, and deploying multi-agent trading strategies.',gradient:1},
+      {title:'Week 43 — Volatility clustering and agent behaviour under stress',category:'Newsletter',date:'October 2025',excerpt:'Weekly digest covering agent performance during the October correction.',gradient:2},
+      {title:'Why we open-sourced our execution engine',category:'Organisation',date:'September 2025',excerpt:'The case for transparency in AI-driven trading infrastructure.',gradient:3},
+      {title:'Attention patterns in order flow prediction',category:'Engineering',date:'August 2025',excerpt:'Transformer attention heads organise into sector-specific patterns on multi-asset order flow.',gradient:4},
+      {title:'Week 38 — Regime shift detection and model rotation',category:'Newsletter',date:'September 2025',excerpt:'How our ensemble detected the September vol regime shift 14 hours before traditional indicators.',gradient:5},
+    ];
+    function renderPosts(){
+      const grid=document.getElementById('blog-grid');grid.innerHTML='';
+      posts.forEach(p=>{
+        const c=document.createElement('article');c.className='blog-card';c.dataset.category=p.category;
+        c.innerHTML=`<div class="blog-card-img" style="background:${gradients[p.gradient]}"></div><div class="blog-card-body"><div class="blog-card-cat">${p.category}</div><h3 class="blog-card-title">${p.title}</h3><p class="blog-card-excerpt">${p.excerpt}</p><div class="blog-card-date">${p.date}</div></div>`;
+        grid.appendChild(c);
+      });
+    }
+    renderPosts();
+    document.getElementById('filter-pills').addEventListener('click',e=>{
+      const btn=e.target.closest('.filter-pill');if(!btn)return;
+      document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+      const cat=btn.dataset.category;
+      document.querySelectorAll('.blog-card').forEach(c=>c.classList.toggle('hidden',cat!=='all'&&c.dataset.category!==cat));
+    });
+
+    /* ============================================================== */
+    /*  CTA FORM                                                       */
+    /* ============================================================== */
+    document.getElementById('cta-form').addEventListener('submit',e=>{
+      e.preventDefault();
+      const input=e.target.querySelector('input');
+      const note=document.getElementById('cta-note');
+      if(input.value){
+        // TODO: wire up form token ID here
+        note.textContent='Thanks! We\'ll be in touch.';
+        note.style.color='#d4cfc8';
+        input.value='';
+        setTimeout(()=>{note.textContent='We\'ll be in touch. No spam.';note.style.color=''},3000);
+      }
+    });
+
+    /* ============================================================== */
+    /*  MOBILE MENU                                                    */
+    /* ============================================================== */
+    document.getElementById('mobile-toggle').addEventListener('click',()=>document.getElementById('mobile-menu').classList.toggle('open'));
+    document.querySelectorAll('.mobile-menu a').forEach(a=>a.addEventListener('click',()=>document.getElementById('mobile-menu').classList.remove('open')));
+
+    /* ============================================================== */
+    /*  SCROLL REVEAL                                                  */
+    /* ============================================================== */
+    const obs=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}});
+    },{threshold:.08,rootMargin:'0px 0px -40px 0px'});
+    document.querySelectorAll('.reveal,.reveal-scale,.reveal-stagger').forEach(el=>obs.observe(el));
+
+  })();
+  </script>
+</body>
+</html>
